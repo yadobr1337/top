@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOP by dobryak</title>
+  <meta name="description" content="Список фильмов, аниме и сериалов с фильтрами, рейтингом и быстрым переходом в Яндекс.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <div class="background-glow background-glow-left"></div>
+    <div class="background-glow background-glow-right"></div>
+
+    <main class="app-card">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">personal watchlist</p>
+          <h1 class="glitch" data-text="TOP by dobryak">TOP by dobryak</h1>
+        </div>
+
+        <button id="open-modal" class="plus-button" type="button" aria-label="Добавить в список">
+          <span>+</span>
+        </button>
+      </header>
+
+      <section class="filters">
+        <div class="filter-row filter-row-split">
+          <div class="filter-group">
+            <button class="chip chip-active" type="button" data-filter-group="sort" data-value="recent">Недавно</button>
+            <button class="chip" type="button" data-filter-group="sort" data-value="rating">Топ рейтинг</button>
+          </div>
+
+          <div class="filter-group">
+            <button class="chip chip-active" type="button" data-filter-group="status" data-value="watched">Просмотрено</button>
+            <button class="chip" type="button" data-filter-group="status" data-value="planned">Запланировано</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <button class="chip chip-active" type="button" data-filter-group="type" data-value="all">Все</button>
+            <button class="chip" type="button" data-filter-group="type" data-value="anime">Аниме</button>
+            <button class="chip" type="button" data-filter-group="type" data-value="movie">Фильмы</button>
+            <button class="chip" type="button" data-filter-group="type" data-value="series">Сериалы</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="list-panel">
+        <div class="list-head">
+          <p id="results-label">Просмотрено</p>
+          <span id="results-count" class="count-badge">0</span>
+        </div>
+
+        <div id="list" class="watch-list" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="item-modal" class="modal">
+    <form id="item-form" class="modal-card" method="dialog">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">new item</p>
+          <h2>Добавить в список</h2>
+        </div>
+
+        <button id="close-modal" class="icon-button" type="button" aria-label="Закрыть форму">×</button>
+      </div>
+
+      <label class="field">
+        <span>Название</span>
+        <input id="title-input" name="title" type="text" placeholder="Например, Interstellar" required>
+      </label>
+
+      <div class="field-grid">
+        <div class="field">
+          <span>Категория</span>
+          <div id="type-input" class="segmented-control" role="radiogroup" aria-label="Категория">
+            <button class="segment segment-active" type="button" data-form-group="type" data-value="movie">Фильм</button>
+            <button class="segment" type="button" data-form-group="type" data-value="anime">Аниме</button>
+            <button class="segment" type="button" data-form-group="type" data-value="series">Сериал</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span>Статус</span>
+          <div id="status-input" class="segmented-control" role="radiogroup" aria-label="Статус">
+            <button class="segment segment-active" type="button" data-form-group="status" data-value="watched">Просмотрено</button>
+            <button class="segment" type="button" data-form-group="status" data-value="planned">Запланировано</button>
+          </div>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>Рейтинг</span>
+        <input id="rating-input" name="rating" type="range" min="1" max="10" step="1" value="8">
+        <strong id="rating-value" class="rating-output">8/10</strong>
+      </label>
+
+      <div class="field">
+        <div class="label-row">
+          <span>Картинка</span>
+          <button id="search-images" class="secondary-button" type="button">Найти 2-3 фото</button>
+        </div>
+
+        <p class="helper-text">Поиск идет по названию через Яндекс.Картинки. Если прокси временно не ответит, можно открыть Яндекс вручную.</p>
+        <div id="image-status" class="image-status"></div>
+        <div id="image-options" class="image-options"></div>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <span>Удаление</span>
+          <button id="toggle-manage-list" class="secondary-button" type="button">Открыть мини список</button>
+        </div>
+        <div id="manage-list-panel" class="manage-list-panel" hidden>
+          <input id="manage-search-input" class="manage-search-input" type="text" placeholder="Поиск по названию">
+          <div id="manage-list" class="manage-list"></div>
+        </div>
+      </div>
+
+      <menu class="modal-actions">
+        <button class="secondary-button" id="open-yandex-images" type="button">Открыть Яндекс.Картинки</button>
+        <button class="primary-button" type="submit">Сохранить</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <template id="item-template">
+    <article class="list-item" tabindex="0" role="link">
+      <img class="poster" alt="">
+      <div class="item-body">
+        <div class="item-top">
+          <h3 class="item-title"></h3>
+          <span class="item-rating"></span>
+        </div>
+        <div class="item-meta">
+          <span class="meta-pill item-type"></span>
+          <span class="meta-pill item-status"></span>
+          <span class="meta-pill item-date"></span>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <template id="manage-item-template">
+    <div class="manage-item">
+      <div class="manage-item-copy">
+        <strong class="manage-item-title"></strong>
+        <span class="manage-item-meta"></span>
+      </div>
+      <button class="delete-row-button" type="button">Удалить</button>
+    </div>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>
